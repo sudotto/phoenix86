@@ -1,23 +1,27 @@
 section .data
-    msg db "hello world", 10  ; The message to print, followed by a newline (0xA)
+	msg db "hello world", 10, 0  ; The message to print, followed by a newline (0xA)
+
+	input db "a"
 
 section .text
-    global _start
-    
+	global _start
+	call _start
 ; calculate the length of a null terminated string
 ; in: ecx = pointer to the string
 ; out: eax = length of the string
 
 strlen:
-    xor eax, eax        ; clear eax
+	xor eax, eax        ; clear eax
+	push ecx            ; save the adress of the start of str
 .loop:
-    cmp byte [ecx], 0   ; check if end of string
-    je .end             ; if end of string jump to end
-    inc ecx             ; go to next char
-    inc eax             ; inc length
-    jmp .loop           ; repeat
+	cmp byte [ecx], 0   ; check if end of string
+	je .end             ; if end of string jump to end
+	inc ecx             ; go to next char
+	inc eax             ; inc length
+	jmp .loop           ; repeat
 .end:
-    ret                 ; return
+	pop ecx             ; return to the start of string
+	ret                 ; return
 
 ; put string to output
 ; in: ecx = pointer to the string
@@ -25,8 +29,8 @@ strlen:
 
 strput:                 ; (ecx: pointer to message)
 	call strlen         ; get length of string ; (for some reason this line makes the printing not work, idk why)
-	mov eax, 12;
 	mov edx, eax        ; put strlen in for syscall
+	mov eax, 12;
 	mov eax, 4          ; sys_write
 	mov ebx, 1          ; file desc for stdout
 	int 0x80            ; syscall
@@ -46,10 +50,11 @@ chget:
 	ret
 
 _start:
-	mov ecx, msg        ; message
-	call strput         ; print message
+	mov ecx, input      ; pointer to store
+	call chget          ; get input
 
-	;mov ecx, char      ; pointer to store
+	mov ecx, input      ; message
+	call strput         ; print message
 
 	mov eax, 1          ; sys_exit
 	xor ebx, ebx        ; exit 0 for success
