@@ -27,7 +27,7 @@ strlen:
 ; in: ecx = pointer to the string
 ; out: prints to stdout
 
-strput:                 ; (ecx: pointer to message)
+print:                  ; (ecx: pointer to message)
 	call strlen         ; get length of string ; (for some reason this line makes the printing not work, idk why)
 	mov edx, eax        ; put strlen in for syscall
 	mov eax, 12;
@@ -41,7 +41,7 @@ strput:                 ; (ecx: pointer to message)
 ; in: ecx = place to store input
 ; out: ecx = value of input
 
-chget:
+getchar:
 	mov eax, 3          ; sys_read
 	mov ebx, 0          ; file desc for stdin
 	mov edx, 1          ; bytes to read
@@ -51,10 +51,10 @@ chget:
 
 _start:
 	mov ecx, input      ; pointer to store
-	call chget          ; get input
+	call getchar        ; get input
 
 	mov ecx, input      ; message
-	call strput         ; print message
+	call print          ; print message
 
 	mov eax, 1          ; sys_exit
 	xor ebx, ebx        ; exit 0 for success
